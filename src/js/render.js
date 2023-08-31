@@ -1,20 +1,26 @@
 
-
-
-<div class="photo-card">
-  <img src="" alt="" loading="lazy" />
+function createMarcup(arr) {
+  //const { webformatURL, largeImageURL, tags, likes, views, comments, downloads } = hits[0];
+  return arr.map(({webformatURL, largeImageURL, tags, likes, views, comments, downloads}) => {
+    `<div class="photo-card">
+  <img src="${webformatURL}" alt="${tags}" loading="lazy" />
   <div class="info">
     <p class="info-item">
-      <b>Likes</b>
+      <b>Likes: ${likes}</b>
     </p>
     <p class="info-item">
-      <b>Views</b>
+      <b>Views:${views}</b>
     </p>
     <p class="info-item">
-      <b>Comments</b>
+      <b>Comments: ${comments}</b>
     </p>
     <p class="info-item">
-      <b>Downloads</b>
+      <b>Downloads: ${downloads}</b>
     </p>
   </div>
-</div>
+</div>`
+    
+  }).join('')
+  
+}
+
