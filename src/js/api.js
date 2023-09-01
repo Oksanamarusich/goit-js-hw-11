@@ -15,7 +15,7 @@ async function serviceImage(searchQuery) {
          orientation: 'horizontal',
          safesearch: true,
          //page: currentPage,
-         per_page: 40,
+         //per_page: 40,
      })
      try {
         const response = await axios.get(`${BASE_URL}?${params} `);
