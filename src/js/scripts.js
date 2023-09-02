@@ -10,30 +10,26 @@ const elem = {
     btnLoadMore: document.querySelector('.load-more'),
 }
 
-const defaults = {
-  photo: "https://cdn.vectorstock.com/i/preview-1x/65/30/default-image-icon-missing-picture-page-vector-40546530.jpg",
-    tags: "xxxx",
-  likes:"xxxx",
-    views:"xxxx",
-  comments:"xxxx",
-    downloads:"xxxx",
-}
+
 let currentPage = 1;
+let currentSearchQuery = '';
 
 elem.btnLoadMore.classList.replace('load-more', 'is-hidden');
 
 elem.searchForm.addEventListener('submit', handlerSubmit);
 elem.btnLoadMore.addEventListener('click', handlerLoadMore);
 
-function handlerLoadMore(searchQuery) {
+function handlerLoadMore() {
   currentPage += 1;
-  serviceImage(searchQuery, currentPage);
+  serviceImage(currentSearchQuery, currentPage);
 }
 
 function handlerSubmit(evt) {
     evt.preventDefault();
-    const { searchQuery }  = evt.currentTarget.elements;
-    serviceImage(searchQuery.value);
+  const { searchQuery } = evt.currentTarget.elements;
+  currentSearchQuery = searchQuery.value;
+  currentPage = 1;
+    serviceImage(currentSearchQuery);
     
       
 }
@@ -54,9 +50,10 @@ async function serviceImage(searchQuery, currentPage = '1') {
      try {
         const response = await axios.get(`${BASE_URL}?${params} `);
        console.log(response);
-       
-       if (response.data.hits.length === 0) {
-         
+       Notify.success(`Hooray! We found ${response.data.totalHits} images.`)
+       if (response.data.hits.length === 0 || searchQuery === '' || searchQuery === ' ') {
+         elem.gallery.innerHTML = ''
+         elem.btnLoadMore.style.display = 'none';
       Notify.info('Sorry, there are no images matching your search query. Please try again.')
        } else {
          
@@ -65,9 +62,10 @@ async function serviceImage(searchQuery, currentPage = '1') {
         }
        if(response.data.hits.length < response.data.totalHits){
          elem.btnLoadMore.classList.replace('is-hidden', 'load-more');
-       } else if (response.data.hits.length >= response.data.totalHits) {
-         Notify.info("We're sorry, but you've reached the end of search results.")
-     }
+        } //else if (!response.data.totalHits) {
+    //      Notify.info("We're sorry, but you've reached the end of search results.")
+    //      elem.btnLoadMore.classList.replace('is-hidden', 'load-more');
+    //  }
         
         
      } catch (error) {
@@ -83,19 +81,19 @@ function createMarkup(arr) {
   
   const markup =  arr.map(({webformatURL, largeImageURL, tags, likes, views, comments, downloads}) => 
     `<div class="photo-card">
-  <img src="${webformatURL || defaults.photo}" alt="${tags || defaults.tags}" loading="lazy" width = "300"/>
+  <img src="${webformatURL}" alt="${tags}" loading="lazy" width = "300"/>
   <div class="info">
     <p class="info-item">
-      <b>Likes</b>${likes||defaults.likes}
+      <b>Likes</b>${likes}
     </p>
     <p class="info-item">
-      <b>Views</b>${views ||defaults.views}
+      <b>Views</b>${views}
     </p>
     <p class="info-item">
-      <b>Comments</b>${comments||defaults.comments}
+      <b>Comments</b>${comments}
     </p>
     <p class="info-item">
-      <b>Downloads</b>${downloads || defaults.downloads}
+      <b>Downloads</b>${downloads}
     </p>
   </div>
 </div>`).join('')
