@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-
+//import { createMarcup } from "./render";
 //axios.defaults.headers.common["x-api-key"] = '39173456-4ceb04e5793e75a9af707096f';
 //axios.defaults.baseURL= 'https://pixabay.com/api/';
 
@@ -20,6 +20,7 @@ async function serviceImage(searchQuery) {
      try {
         const response = await axios.get(`${BASE_URL}?${params} `);
         console.log(response);
+        createMarcup(response.data.hits);
         
   } catch (error) {
          console.error(error);
