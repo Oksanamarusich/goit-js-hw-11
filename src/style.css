@@ -62,6 +62,8 @@ img{
     justify-content: center;
     align-items: center;
     gap: 10px;
+    color:black;
+    text-decoration: underline;
 }
 .info-item{
     display: flex;

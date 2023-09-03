@@ -3,6 +3,9 @@
 //import { createMarcup } from "./render";
 import axios from "axios";
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import SimpleLightbox from "simplelightbox";
+import "simplelightbox/dist/simple-lightbox.min.css";
+
 
 const elem = {
     searchForm: document.querySelector('.search-form'),
@@ -10,9 +13,14 @@ const elem = {
     btnLoadMore: document.querySelector('.load-more'),
 }
 
+const lightbox = new SimpleLightbox('.gallery a', {
+     captionsData: 'alt', captionDelay: 250
+  
+   });
 
 let currentPage = 1;
 let currentSearchQuery = '';
+let loadedImgBox = 0;
 
 elem.btnLoadMore.classList.replace('load-more', 'is-hidden');
 
@@ -29,9 +37,7 @@ function handlerSubmit(evt) {
   const { searchQuery } = evt.currentTarget.elements;
   currentSearchQuery = searchQuery.value;
   currentPage = 1;
-    serviceImage(currentSearchQuery);
-    
-      
+  serviceImage(currentSearchQuery);
 }
 
 async function serviceImage(searchQuery, currentPage = '1') {
@@ -47,28 +53,34 @@ async function serviceImage(searchQuery, currentPage = '1') {
          per_page: 40,
      })
   
-     try {
+  try {
+    if (!searchQuery || searchQuery === ' ') {
+      Notify.info('Sorry, there are no images matching your search query. Please try again.')
+      return;
+       }
         const response = await axios.get(`${BASE_URL}?${params} `);
        console.log(response);
-       Notify.success(`Hooray! We found ${response.data.totalHits} images.`)
-       if (response.data.hits.length === 0 || searchQuery === '' || searchQuery === ' ') {
-         elem.gallery.innerHTML = ''
-         elem.btnLoadMore.style.display = 'none';
-      Notify.info('Sorry, there are no images matching your search query. Please try again.')
-       } else {
-         
-         const newMarkup = createMarkup(response.data.hits);
-         elem.gallery.insertAdjacentHTML('beforeend', newMarkup);
-        }
-       if(response.data.hits.length < response.data.totalHits){
+       if (currentPage === '1'&& response.data.hits.length) {
          elem.btnLoadMore.classList.replace('is-hidden', 'load-more');
-        } //else if (!response.data.totalHits) {
-    //      Notify.info("We're sorry, but you've reached the end of search results.")
-    //      elem.btnLoadMore.classList.replace('is-hidden', 'load-more');
-    //  }
+         Notify.success(`Hooray! We found ${response.data.totalHits} images.`)
+         
+       }
+       createMarkup(response.data.hits);
         
-        
-     } catch (error) {
+        if (!response.data.totalHits) {
+         elem.gallery.innerHTML = ''
+         elem.btnLoadMore.classList.replace('load-more', 'is-hidden');
+         
+        Notify.info('Sorry, there are no images matching your search query. Please try again.')
+       }
+       
+        if (loadedImgBox >= response.data.totalHits) {
+         elem.btnLoadMore.classList.replace('load-more', 'is-hidden');
+          Notify.info("We're sorry, but you've reached the end of search results.")
+          
+      }  
+    
+    } catch (error) {
        
     console.error(error);
           Notify.failure('Invalid parameters: your request parameters are incorrect.')
@@ -81,6 +93,7 @@ function createMarkup(arr) {
   
   const markup =  arr.map(({webformatURL, largeImageURL, tags, likes, views, comments, downloads}) => 
     `<div class="photo-card">
+  <a href="${largeImageURL}">
   <img src="${webformatURL}" alt="${tags}" loading="lazy" width = "300"/>
   <div class="info">
     <p class="info-item">
@@ -95,10 +108,12 @@ function createMarkup(arr) {
     <p class="info-item">
       <b>Downloads</b>${downloads}
     </p>
-  </div>
+  </div></a>
 </div>`).join('')
   
-  elem.gallery.innerHTML= markup;
+  elem.gallery.innerHTML = markup;
+  loadedImgBox += 40;
+  lightbox.refresh();
 }
 
 
