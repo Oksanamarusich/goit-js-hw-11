@@ -1,6 +1,5 @@
 
-//import { serviceImage } from "./api";
-//import { createMarcup } from "./render";
+
 import axios from "axios";
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import SimpleLightbox from "simplelightbox";
@@ -38,6 +37,7 @@ function handlerSubmit(evt) {
   currentSearchQuery = searchQuery.value;
   currentPage = 1;
   serviceImage(currentSearchQuery);
+  
 }
 
 async function serviceImage(searchQuery, currentPage = '1') {
@@ -67,12 +67,13 @@ async function serviceImage(searchQuery, currentPage = '1') {
        }
        createMarkup(response.data.hits);
         
-        if (!response.data.totalHits) {
+        if (!response.data.totalHits && !response.data.hits.length) {
          elem.gallery.innerHTML = ''
          elem.btnLoadMore.classList.replace('load-more', 'is-hidden');
          
-        Notify.info('Sorry, there are no images matching your search query. Please try again.')
-       }
+        Notify.failure('Sorry, there are no images matching your search query. Please try again.')
+          return;
+        }
        
         if (loadedImgBox >= response.data.totalHits) {
          elem.btnLoadMore.classList.replace('load-more', 'is-hidden');
@@ -115,6 +116,7 @@ function createMarkup(arr) {
   loadedImgBox += 40;
   lightbox.refresh();
 }
+
 
 
 
