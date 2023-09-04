@@ -19,7 +19,8 @@ const lightbox = new SimpleLightbox('.gallery a', {
 
 let currentPage = 1;
 let currentSearchQuery = '';
-let loadedImgBox = 0;
+//let loadedImgBox = 0;
+let response;
 
 elem.btnLoadMore.classList.replace('load-more', 'is-hidden');
 
@@ -29,6 +30,7 @@ elem.btnLoadMore.addEventListener('click', handlerLoadMore);
 function handlerLoadMore() {
   currentPage += 1;
   serviceImage(currentSearchQuery, currentPage);
+  
 }
 
 function handlerSubmit(evt) {
@@ -38,6 +40,8 @@ function handlerSubmit(evt) {
   currentPage = 1;
   serviceImage(currentSearchQuery);
   
+  elem.gallery.innerHTML = '';
+  lightbox.refresh();
 }
 
 async function serviceImage(searchQuery, currentPage = '1') {
@@ -58,15 +62,15 @@ async function serviceImage(searchQuery, currentPage = '1') {
       Notify.info('Sorry, there are no images matching your search query. Please try again.')
       return;
        }
-        const response = await axios.get(`${BASE_URL}?${params} `);
+         response = await axios.get(`${BASE_URL}?${params} `);
        console.log(response);
        if (currentPage === '1'&& response.data.hits.length) {
          elem.btnLoadMore.classList.replace('is-hidden', 'load-more');
          Notify.success(`Hooray! We found ${response.data.totalHits} images.`)
          
        }
-       createMarkup(response.data.hits);
-        
+      createMarkup(response.data.hits);
+      
         if (!response.data.totalHits && !response.data.hits.length) {
          elem.gallery.innerHTML = ''
          elem.btnLoadMore.classList.replace('load-more', 'is-hidden');
@@ -74,12 +78,11 @@ async function serviceImage(searchQuery, currentPage = '1') {
         Notify.failure('Sorry, there are no images matching your search query. Please try again.')
           return;
         }
-       
-        if (loadedImgBox >= response.data.totalHits) {
-         elem.btnLoadMore.classList.replace('load-more', 'is-hidden');
-          Notify.info("We're sorry, but you've reached the end of search results.")
-          
-      }  
+    
+    if (currentPage * 40 >= response.data.totalHits) {
+      elem.btnLoadMore.classList.replace('load-more', 'is-hidden');
+       Notify.info("We're sorry, but you've reached the end of search results.")
+     } 
     
     } catch (error) {
        
@@ -93,7 +96,7 @@ async function serviceImage(searchQuery, currentPage = '1') {
 function createMarkup(arr) {
   
   const markup =  arr.map(({webformatURL, largeImageURL, tags, likes, views, comments, downloads}) => 
-    `<div class="photo-card">
+    `<div>
   <a href="${largeImageURL}">
   <img src="${webformatURL}" alt="${tags}" loading="lazy" width = "300"/>
   <div class="info">
@@ -111,10 +114,11 @@ function createMarkup(arr) {
     </p>
   </div></a>
 </div>`).join('')
+      
+  elem.gallery.insertAdjacentHTML("beforeend", markup);
+     lightbox.refresh();
   
-  elem.gallery.innerHTML = markup;
-  loadedImgBox += 40;
-  lightbox.refresh();
+ //loadedImgBox += 40;
 }
 
 
