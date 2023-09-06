@@ -15,11 +15,12 @@ const elem = {
 const lightbox = new SimpleLightbox('.gallery a', {
      captionsData: 'alt', captionDelay: 250
   
-   });
+});
+   
+
 
 let currentPage = 1;
 let currentSearchQuery = '';
-//let loadedImgBox = 0;
 let response;
 
 elem.btnLoadMore.classList.replace('load-more', 'is-hidden');
@@ -118,7 +119,6 @@ function createMarkup(arr) {
   elem.gallery.insertAdjacentHTML("beforeend", markup);
      lightbox.refresh();
   
- //loadedImgBox += 40;
 }
 
 
